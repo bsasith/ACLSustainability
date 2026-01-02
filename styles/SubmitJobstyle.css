@@ -1,0 +1,35 @@
+div.topbar {
+    height: 50px;
+    width: 100%;
+    background-color: #4A9AE4;
+}
+
+h1.topbar-text {
+    float: left;
+    font-family: "Jockey One", sans-serif;
+    color: white;
+
+}
+
+h1.topbar-username {
+    float: right;
+    font-family: "Jockey One", sans-serif;
+    color: #4440F8;
+
+}
+
+h1.topbar-logout {
+    float: right;
+    font-family: "Jockey One", sans-serif;
+    color: white;
+}
+h1.topbar-logout:hover {
+    color: red;
+}
+div.box-firstline{
+    Display: block;
+    width: 100%;
+}
+div.box-secondline{
+    Display: block;
+}

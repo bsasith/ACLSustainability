@@ -1,0 +1,150 @@
+/*topbar*/
+div.topbar {
+    height: 50px;
+    width: 100%;
+    background-color: #4A9AE4;
+}
+
+h1.topbar-text {
+    float: left;
+    font-family: "Jockey One", sans-serif;
+    color: white;
+
+}
+
+h1.topbar-username {
+    float: right;
+    font-family: "Jockey One", sans-serif;
+    color: #4440F8;
+
+}
+
+h1.topbar-logout {
+    float: right;
+    font-family: "Jockey One", sans-serif;
+    color: white;
+}
+
+h1.topbar-logout:hover {
+    color: red;
+}
+
+
+/* container */
+
+h1.box-text {
+    text-align: center;
+    font-family: "Jockey One", sans-serif;
+
+}
+
+
+#box1 {
+    background-color: #7AFF77;
+}
+
+#box1:hover {
+    opacity: 80%;
+}
+
+#box2 {
+    background-color: #FFBB7C;
+}
+
+#box2:hover {
+    opacity: 80%;
+}
+
+#box3 {
+    background-color: #F56464;
+}
+
+#box3:hover {
+    opacity: 80%;
+
+}
+
+#box4 {
+    background-color: #21CCD7;
+}
+
+#box4:hover {
+    opacity: 80%;
+
+}
+
+#box5 {
+    background-color: #B2CF00;
+}
+
+#box5:hover {
+    opacity: 80%;
+
+}
+
+#box6 {
+    background-color: #FC7CFF;
+}
+
+#box6:hover {
+    opacity: 80%;
+
+}
+
+#box7 {
+    background-color: #FF7A00;
+}
+
+#box7:hover {
+    opacity: 80%;
+
+}
+
+#box8 {
+    background-color:#808080;
+}
+
+#box8:hover {
+    opacity: 80%;
+
+}
+
+#box9 {
+    background-color:#CD853F;
+}
+
+#box9:hover {
+    opacity: 80%;
+
+}
+
+a {
+    text-decoration: none;
+}
+
+.grid-container {
+
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    /* display: inline-grid; */
+    grid-template-columns: 370px 370px 370px;
+    grid-template-rows: 215px 215px 215px;
+    column-gap: 10px;
+    row-gap: 10px;
+
+
+}
+
+.grid-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 215px;
+    font-size: 3em;
+}
+
+#myChart {
+    max-width: 1000px; /* Set a maximum width */
+    height: auto;     /* Maintain aspect ratio */
+}
