@@ -3,10 +3,10 @@ require_once __DIR__ . '/auth.php';
 
 start_session();
 
-if (is_logged_in()) {
-    header('Location: dashboard.php');
-    exit;
-}
+// if (is_logged_in()) {
+//     header('Location: dashboard.php');
+//     exit;
+// }
 
 $error = '';
 

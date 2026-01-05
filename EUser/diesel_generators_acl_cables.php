@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../auth.php';
 require_login();
 
-if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
+if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
     logout();
     header('Location: login.php');
     exit;
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // If no error, insert
     if ($errorMsg === '') {
         try {
-            $sql = "INSERT INTO diesel_boilers_acl_cables
+            $sql = "INSERT INTO diesel_generators_acl_cables
                     (report_month, report_year, diesel_litres, created_by, company_name, emission_scope, activity_type)
                     VALUES (?, ?, ?, ?, ?, ?, ?)";
 
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $username       = current_username();
             $company        = "ACL Cables PLC";
-            $activity_type  = "Steam Boilers";
+            $activity_type  = "Diesel Generators";
             $emission_scope = "Scope 1";
 
             // month(s), year(i), litres(d), created_by(s), company(s), scope(s), activity(s)
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $qYear   = urlencode((string)$year);
             $qLitres = urlencode((string)$litres);
 
-            header("Location: diesel_boilers_acl_cables.php?success=1&year={$qYear}&month={$qMonth}&litres={$qLitres}");
+            header("Location: diesel_generators_acl_cables.php?success=1&year={$qYear}&month={$qMonth}&litres={$qLitres}");
             exit;
 
         } catch (mysqli_sql_exception $e) {
@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Diesel Consumption – Steam Boilers (ACL Cables PLC)</title>
+    <title>Monthly Diesel Consumption – Diesel Generators (ACL Cables PLC)</title>
 
     <!-- Existing CSS -->
     <link rel="stylesheet" href="../styles/indexstyle.css">
@@ -224,7 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-header">
                 <h2 class="form-title">
                     <i class="bi bi-fire"></i>
-                    Monthly Diesel Consumption – Steam Boilers
+                    Monthly Diesel Consumption – Generators
                 </h2>
                 <div class="form-sub">
                     ACL Cables PLC | Scope 1 – Direct GHG Emissions

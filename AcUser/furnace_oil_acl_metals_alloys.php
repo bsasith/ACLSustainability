@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $month  = trim($_POST['month'] ?? '');
     $year   = (int)($_POST['year'] ?? 0);
-    $litres = (float)($_POST['diesel_litres'] ?? -1);
+    $litres = (float)($_POST['furnace_oil_litres'] ?? -1);
 
     // Basic validation
     if ($month === '' || $year <= 0 || $litres < 0) {
@@ -65,16 +65,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // If no error, insert
     if ($errorMsg === '') {
         try {
-            $sql = "INSERT INTO diesel_boilers_acl_cables
-                    (report_month, report_year, diesel_litres, created_by, company_name, emission_scope, activity_type)
+            $sql = "INSERT INTO furnace_oil_acl_metals_alloys
+                    (report_month, report_year, furnace_oil_litres, created_by, company_name, emission_scope, activity_type)
                     VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             $conn = db();
             $stmt = $conn->prepare($sql);
 
             $username       = current_username();
-            $company        = "ACL Cables PLC";
-            $activity_type  = "Steam Boilers";
+            $company        = "ACL Metals & Alloys PLC";
+            $activity_type  = "Furnace Oil";
             $emission_scope = "Scope 1";
 
             // month(s), year(i), litres(d), created_by(s), company(s), scope(s), activity(s)
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $qYear   = urlencode((string)$year);
             $qLitres = urlencode((string)$litres);
 
-            header("Location: diesel_boilers_acl_cables.php?success=1&year={$qYear}&month={$qMonth}&litres={$qLitres}");
+            header("Location: furnace_oil_acl_metals_alloys.php?success=1&year={$qYear}&month={$qMonth}&litres={$qLitres}");
             exit;
 
         } catch (mysqli_sql_exception $e) {
@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Diesel Consumption – Steam Boilers (ACL Cables PLC)</title>
+    <title>Monthly Furnace Oil Consumption - ACL Metals & Alloys</title>
 
     <!-- Existing CSS -->
     <link rel="stylesheet" href="../styles/indexstyle.css">
@@ -204,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($success): ?>
             <div class="alert alert-success rounded-4">
                 <i class="bi bi-check-circle-fill"></i>
-                Monthly diesel consumption data saved successfully.
+                Monthly Furnace Oil Consumption data saved successfully.
                 <br>
                 <strong>Year:</strong> <?php echo htmlspecialchars($dispYear); ?>,
                 <strong>Month:</strong> <?php echo htmlspecialchars($dispMonth); ?>,
@@ -224,10 +224,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-header">
                 <h2 class="form-title">
                     <i class="bi bi-fire"></i>
-                    Monthly Diesel Consumption – Steam Boilers
+                    Monthly Furnace Oil Consumption – ACL Metals & Alloys
                 </h2>
                 <div class="form-sub">
-                    ACL Cables PLC | Scope 1 – Direct GHG Emissions
+                    ACL Metals & Alloys PLC | Scope 1 – Direct GHG Emissions
                 </div>
             </div>
 
@@ -265,14 +265,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </select>
                     </div>
 
-                    <!-- Diesel Litres -->
+                    <!-- Furnace Oil Litres -->
                     <div class="mb-4">
-                        <label class="form-label">Diesel Consumption (Litres)</label>
+                        <label class="form-label">Furnace Oil Consumption (Litres)</label>
                         <input
                             type="number"
-                            name="diesel_litres"
+                            name="furnace_oil_litres"
                             class="form-control"
-                            placeholder="Enter total diesel consumption for the month"
+                            placeholder="Enter total furnace oil consumption for the month"
                             step="0.01"
                             min="0"
                             required>

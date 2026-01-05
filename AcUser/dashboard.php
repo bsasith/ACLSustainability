@@ -237,7 +237,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
                 <a href="furnace_oil_acl_metals_alloys.php" class="btn btn-success btn-sm btn-ghost">
                     <i class="bi bi-plus-circle"></i> Enter Data
                 </a>
-                <a href="furnace_oil_acl_metals_alloys_edit_last.php" class="btn btn-warning btn-sm btn-ghost">
+                <a href="furnace_oil_acl_metals_alloys_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
                     <i class="bi bi-pencil-square"></i> Edit / View
                 </a>
             </div>
@@ -277,7 +277,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
                 <a href="diesel_senior_vehicles_acl_complex.php" class="btn btn-success btn-sm btn-ghost">
                     <i class="bi bi-plus-circle"></i> Enter Data
                 </a>
-                <a href="diesel_senior_vehicles_acl_complex_edit_last.php" class="btn btn-warning btn-sm btn-ghost">
+                <a href="diesel_senior_vehicles_acl_complex_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
                     <i class="bi bi-pencil-square"></i> Edit / View
                 </a>
             </div>

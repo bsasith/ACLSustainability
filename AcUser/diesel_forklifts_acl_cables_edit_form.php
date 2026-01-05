@@ -42,15 +42,47 @@ if (!$row) {
 // --------------------
 // 3) Handle UPDATE
 // --------------------
+
+// Month map for validation + future blocking
+$monthsMap = [
+    'January' => 1,
+    'February' => 2,
+    'March' => 3,
+    'April' => 4,
+    'May' => 5,
+    'June' => 6,
+    'July' => 7,
+    'August' => 8,
+    'September' => 9,
+    'October' => 10,
+    'November' => 11,
+    'December' => 12
+];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $month  = trim($_POST['month'] ?? '');
     $year   = (int)($_POST['year'] ?? 0);
     $litres = (float)($_POST['diesel_litres'] ?? -1);
 
+    // Basic validation
     if ($month === '' || $year <= 0 || $litres < 0) {
         $errorMsg = "Please fill all fields correctly.";
+    } elseif (!isset($monthsMap[$month])) {
+        $errorMsg = "Invalid month selected.";
     } else {
+        // ✅ Block future month/year (server-side)
+        $selectedMonth = $monthsMap[$month];
+        $currentYear   = (int)date('Y');
+        $currentMonth  = (int)date('n'); // 1 = January
+
+        if ($year > $currentYear) {
+            $errorMsg = "You cannot enter data for a future year.";
+        } elseif ($year === $currentYear && $selectedMonth > $currentMonth) {
+            $errorMsg = "You cannot enter data for a future month.";
+        }
+    }
+
+    if ($errorMsg === '') {
         try {
             $sql = "UPDATE diesel_forklifts_acl_cables
                     SET report_month = ?, 

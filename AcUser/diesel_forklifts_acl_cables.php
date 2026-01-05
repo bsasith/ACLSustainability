@@ -16,24 +16,54 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
+$conn = db();
 $errorMsg = '';
-$success  = isset($_GET['success']); // success comes from redirect flag
+$success  = isset($_GET['success']); // PRG pattern
 
-// Values for display after redirect (GET)
+// Display values after redirect (GET)
 $dispYear   = $_GET['year'] ?? '';
 $dispMonth  = $_GET['month'] ?? '';
 $dispLitres = $_GET['litres'] ?? '';
+
+$monthsList = [
+    'January','February','March','April','May','June',
+    'July','August','September','October','November','December'
+];
+
+$monthsMap = [
+    'January' => 1, 'February' => 2, 'March' => 3,
+    'April' => 4, 'May' => 5, 'June' => 6,
+    'July' => 7, 'August' => 8, 'September' => 9,
+    'October' => 10, 'November' => 11, 'December' => 12
+];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $month  = trim($_POST['month'] ?? '');
     $year   = (int)($_POST['year'] ?? 0);
-    $litres = (float)($_POST['diesel_litres'] ?? 0);
+    $litres = (float)($_POST['diesel_litres'] ?? -1);
 
+    // Basic validation
     if ($month === '' || $year <= 0 || $litres < 0) {
         $errorMsg = "Please fill all fields correctly.";
+    } elseif (!isset($monthsMap[$month])) {
+        $errorMsg = "Invalid month selected.";
     } else {
 
+        // ✅ Block future month/year (server-side)
+        $selectedMonth = $monthsMap[$month];
+        $currentYear   = (int)date('Y');
+        $currentMonth  = (int)date('n'); // 1 = January
+
+        if ($year > $currentYear) {
+            $errorMsg = "You cannot enter data for a future year.";
+        } elseif ($year === $currentYear && $selectedMonth > $currentMonth) {
+            $errorMsg = "You cannot enter data for a future month.";
+        }
+    }
+
+    // If no error, insert
+    if ($errorMsg === '') {
         try {
             $sql = "INSERT INTO diesel_forklifts_acl_cables
                     (report_month, report_year, diesel_litres, created_by, company_name, emission_scope, activity_type)

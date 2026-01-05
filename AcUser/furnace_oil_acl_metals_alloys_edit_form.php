@@ -25,8 +25,8 @@ if ($id <= 0) {
 // --------------------
 // 2) Fetch existing row
 // --------------------
-$sql = "SELECT report_month, report_year, diesel_litres
-        FROM diesel_transport_logistics_acl_complex
+$sql = "SELECT report_month, report_year, furnace_oil_litres
+        FROM furnace_oil_acl_metals_alloys
         WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id);
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $month  = trim($_POST['month'] ?? '');
     $year   = (int)($_POST['year'] ?? 0);
-    $litres = (float)($_POST['diesel_litres'] ?? -1);
+    $litres = (float)($_POST['furnace_oil_litres'] ?? -1);
 
     // Basic validation
     if ($month === '' || $year <= 0 || $litres < 0) {
@@ -84,10 +84,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($errorMsg === '') {
         try {
-            $sql = "UPDATE diesel_transport_logistics_acl_complex
+            $sql = "UPDATE furnace_oil_acl_metals_alloys
                     SET report_month = ?, 
                         report_year = ?, 
-                        diesel_litres = ?, 
+                        furnace_oil_litres = ?, 
                         updated_at = NOW()
                     WHERE id = ?";
 
@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             $stmt->close();
 
-            header("Location: diesel_transport_logistics_acl_complex_edit_form.php?id={$id}&success=1");
+            header("Location: furnace_oil_acl_metals_alloys_edit_form.php?id={$id}&success=1");
             exit;
 
         } catch (mysqli_sql_exception $e) {
@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Diesel Consumption – Transport & Logistics</title>
+<title>Edit Monthly Furnace Oil Consumption</title>
 
 <link rel="stylesheet" href="../styles/indexstyle.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -188,10 +188,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="form-header">
         <h2 class="form-title">
             <i class="bi bi-pencil-square"></i>
-            Edit Monthly Diesel Consumption – Transport & Logistics
+            Edit Monthly Monthly Furnace Oil Consumption
         </h2>
         <div class="form-sub">
-            ACL Cables PLC | Scope 1 – Direct GHG Emissions
+            ACL Metals & Alloys | Scope 1 – Direct GHG Emissions
         </div>
     </div>
 
@@ -231,18 +231,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Litres -->
             <div class="mb-4">
-                <label class="form-label fw-bold">Diesel Consumption (Litres)</label>
+                <label class="form-label fw-bold">Furnace Oil Consumption (Litres)</label>
                 <input type="number"
-                       name="diesel_litres"
+                       name="furnace_oil_litres"
                        class="form-control"
                        step="0.01"
                        min="0"
-                       value="<?php echo htmlspecialchars($row['diesel_litres']); ?>"
+                       value="<?php echo htmlspecialchars($row['furnace_oil_litres']); ?>"
                        required>
             </div>
 
             <div class="d-flex justify-content-end gap-2">
-                <a href="diesel_transport_logistics_acl_complex_view_edit.php" class="btn btn-outline-secondary btn-submit">
+                <a href="furnace_oil_acl_metals_alloys_view_edit.php" class="btn btn-outline-secondary btn-submit">
                     <i class="bi bi-table"></i> Back to Table
                 </a>
                 <button type="submit" class="btn btn-success btn-submit">
