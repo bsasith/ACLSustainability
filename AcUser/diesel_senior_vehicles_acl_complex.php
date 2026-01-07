@@ -223,7 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card form-card">
             <div class="form-header">
                 <h2 class="form-title">
-                    <i class="bi bi-fire"></i>
+                    
+                    <i class="bi bi-car-front-fill kpi-icon"></i>
                     Monthly Fuel Consumption – Senior Executive Vehicles
                 </h2>
                 <div class="form-sub">

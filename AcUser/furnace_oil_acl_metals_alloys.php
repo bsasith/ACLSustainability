@@ -223,7 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card form-card">
             <div class="form-header">
                 <h2 class="form-title">
-                    <i class="bi bi-fire"></i>
+                    
+                    <i class="bi bi-droplet-fill kpi-icon"></i>
                     Monthly Furnace Oil Consumption – ACL Metals & Alloys
                 </h2>
                 <div class="form-sub">

@@ -281,4 +281,44 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
                     <i class="bi bi-pencil-square"></i> Edit / View
                 </a>
             </div>
-     
+   
+      
+    </div>          
+    </div>  
+      <!-- added -->
+    <!-- <div class="card section-card">
+        <div class="section-top">
+            <h2 class="section-title">
+                <i class="bi bi-download text-danger"></i>
+               View and Download Data
+            </h2>
+            <div class="section-sub">
+               Download previously entered data for certain periods
+            </div>
+        </div> -->
+<br>
+<br>
+        <!-- a) Downlaod CSV -->
+        <div class="kpi-row">
+            <div class="kpi-left">
+                 <i class="bi bi-download text-danger"></i>
+                <div>
+                    <div class="kpi-text">View and Download Data</div>
+                    <span class="kpi-meta">Download previously entered data for certain periods</span>
+                </div>
+            </div>
+            <div class="kpi-actions">
+               
+                <a href="acuser_view_data.php" class="btn btn-success btn-sm btn-ghost">
+                    <i class="bi bi-plus-circle"></i> Download/View Data
+                </a>
+                <!-- <a href="diesel_boilers_acl_cables_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
+                    <i class="bi bi-pencil-square"></i> Edit / View
+                </a> -->
+            </div>
+        </div>
+
+</div>  
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>        
+</body>
+</html>

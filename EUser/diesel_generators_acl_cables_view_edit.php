@@ -81,7 +81,8 @@ if ($result) {
         <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
                 <h4 class="mb-1 fw-bold">
-                    <i class="bi bi-fire text-danger"></i>
+                    <!-- <i class="bi bi-fire "></i> -->
+                    <i class="bi bi-fuel-pump-diesel-fill text-danger"></i>
                     Monthly Diesel Consumption – Diesel Generators
                 </h4>
                 <div class="text-muted fw-semibold">
@@ -92,7 +93,7 @@ if ($result) {
             <div class="d-flex gap-2">
               
 
-                <a href="diesel_boilers_acl_cables.php" class="btn btn-success">
+                <a href="diesel_generators_acl_cables.php" class="btn btn-success">
                     <i class="bi bi-plus-circle"></i> Enter Data
                 </a>
 

@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $month  = trim($_POST['month'] ?? '');
     $year   = (int)($_POST['year'] ?? 0);
-    $litres = (float)($_POST['diesel_litres'] ?? -1);
+    $litres = (float)($_POST['electricity_kwh'] ?? -1);
 
     // Basic validation
     if ($month === '' || $year <= 0 || $litres < 0) {
@@ -65,17 +65,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // If no error, insert
     if ($errorMsg === '') {
         try {
-            $sql = "INSERT INTO diesel_generators_acl_cables
-                    (report_month, report_year, diesel_litres, created_by, company_name, emission_scope, activity_type)
+            $sql = "INSERT INTO electricity_ceylon_copper
+                    (report_month, report_year, electricity_kwh, created_by, company_name, emission_scope, activity_type)
                     VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             $conn = db();
             $stmt = $conn->prepare($sql);
 
             $username       = current_username();
-            $company        = "ACL Cables PLC";
-            $activity_type  = "Diesel Generators";
-            $emission_scope = "Scope 1";
+            $company        = "Ceylon Copper";
+            $activity_type  = "Electricity Consumption";
+            $emission_scope = "Scope 2";
 
             // month(s), year(i), litres(d), created_by(s), company(s), scope(s), activity(s)
             $stmt->bind_param("sidssss", $month, $year, $litres, $username, $company, $emission_scope, $activity_type);
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $qYear   = urlencode((string)$year);
             $qLitres = urlencode((string)$litres);
 
-            header("Location: diesel_generators_acl_cables.php?success=1&year={$qYear}&month={$qMonth}&litres={$qLitres}");
+            header("Location: electricity_ceylon_copper.php?success=1&year={$qYear}&month={$qMonth}&litres={$qLitres}");
             exit;
 
         } catch (mysqli_sql_exception $e) {
@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Diesel Consumption – Diesel Generators (ACL Cables PLC)</title>
+    <title>Monthly Electricity Consumption – Ceylon Copper</title>
 
     <!-- Existing CSS -->
     <link rel="stylesheet" href="../styles/indexstyle.css">
@@ -204,11 +204,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($success): ?>
             <div class="alert alert-success rounded-4">
                 <i class="bi bi-check-circle-fill"></i>
-                Monthly diesel consumption data saved successfully.
+                Monthly electricity consumption data saved successfully.
                 <br>
                 <strong>Year:</strong> <?php echo htmlspecialchars($dispYear); ?>,
                 <strong>Month:</strong> <?php echo htmlspecialchars($dispMonth); ?>,
-                <strong>Litres:</strong> <?php echo htmlspecialchars($dispLitres); ?>
+                <strong>kWh:</strong> <?php echo htmlspecialchars($dispLitres); ?>
                 <br>
                 <small class="text-muted">Redirecting to dashboard in 3 seconds…</small>
             </div>
@@ -223,12 +223,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card form-card">
             <div class="form-header">
                 <h2 class="form-title">
-                    <!-- <i class="bi bi-fire"></i> -->
-                     <i class="bi bi-fuel-pump-diesel-fill kpi-icon"></i>
-                    Monthly Diesel Consumption – Generators
-                </h2>
+                    <i class="bi bi-building-fill-check kpi-icon"></i>
+                    Monthly Electricity Consumption – Ceylon Copper </h2>
                 <div class="form-sub">
-                    ACL Cables PLC | Scope 1 – Direct GHG Emissions
+                    Ceylon Copper  | Scope 2 – Indirect GHG Emissions
                 </div>
             </div>
 
@@ -266,14 +264,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </select>
                     </div>
 
-                    <!-- Diesel Litres -->
+                    <!-- Electricity kWh -->
                     <div class="mb-4">
-                        <label class="form-label">Diesel Consumption (Litres)</label>
+                        <label class="form-label">Electricity Consumption (kWh)</label>
                         <input
                             type="number"
-                            name="diesel_litres"
+                            name="electricity_kwh"
                             class="form-control"
-                            placeholder="Enter total diesel consumption for the month"
+                            placeholder="Enter total electricity consumption for the month"
                             step="0.01"
                             min="0"
                             required>

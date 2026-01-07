@@ -81,7 +81,8 @@ if ($result) {
         <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
                 <h4 class="mb-1 fw-bold">
-                    <i class="bi bi-fire text-danger"></i>
+                    <i class="bi bi-car-front-fill text-danger"></i>
+                    <!-- <i class="bi bi-fire text-danger"></i> -->
                     Monthly Fuel Consumption – Senior Executive Vehicles
                 </h4>
                 <div class="text-muted fw-semibold">

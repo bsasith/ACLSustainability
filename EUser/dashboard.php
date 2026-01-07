@@ -305,7 +305,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
             <div class="kpi-left">
                 <i class="bi bi-sun kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">a) Solar Electricity Generation</div>
+                    <div class="kpi-text">a) Solar Electricity Generation (kWh)</div>
                     <span class="kpi-meta">ACL Cables PLC</span>
                 </div>
             </div>
@@ -321,7 +321,27 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
         </div>
 
     </div>
-
+<br>
+<br>
+        <!-- a) Downlaod CSV -->
+        <div class="kpi-row">
+            <div class="kpi-left">
+                 <i class="bi bi-download text-danger"></i>
+                <div>
+                    <div class="kpi-text">View and Download Data</div>
+                    <span class="kpi-meta">Download previously entered data for certain periods</span>
+                </div>
+            </div>
+            <div class="kpi-actions">
+               
+                <a href="euser_view_data.php" class="btn btn-success btn-sm btn-ghost">
+                    <i class="bi bi-plus-circle"></i> Download/View Data
+                </a>
+                <!-- <a href="diesel_boilers_acl_cables_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
+                    <i class="bi bi-pencil-square"></i> Edit / View
+                </a> -->
+            </div>
+        </div>
 </div>
 </body>
 </html>

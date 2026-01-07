@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // If no error, insert
     if ($errorMsg === '') {
         try {
-            $sql = "INSERT INTO diesel_generators_acl_cables
+            $sql = "INSERT INTO diesel_generators_ceylon_copper
                     (report_month, report_year, diesel_litres, created_by, company_name, emission_scope, activity_type)
                     VALUES (?, ?, ?, ?, ?, ?, ?)";
 
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare($sql);
 
             $username       = current_username();
-            $company        = "ACL Cables PLC";
+            $company        = "Ceylon Copper";
             $activity_type  = "Diesel Generators";
             $emission_scope = "Scope 1";
 
@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Diesel Consumption – Diesel Generators (ACL Cables PLC)</title>
+    <title>Monthly Diesel Consumption – Diesel Generators (Ceylon Copper)</title>
 
     <!-- Existing CSS -->
     <link rel="stylesheet" href="../styles/indexstyle.css">
@@ -224,11 +224,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="form-header">
                 <h2 class="form-title">
                     <!-- <i class="bi bi-fire"></i> -->
-                     <i class="bi bi-fuel-pump-diesel-fill kpi-icon"></i>
+                    <i class="bi bi-fuel-pump-fill kpi-icon"></i>
                     Monthly Diesel Consumption – Generators
                 </h2>
                 <div class="form-sub">
-                    ACL Cables PLC | Scope 1 – Direct GHG Emissions
+                    Ceylon Copper | Scope 1 – Direct GHG Emissions
                 </div>
             </div>
 
