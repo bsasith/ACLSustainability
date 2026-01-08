@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../auth.php';
 require_login();
 
-if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
+if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'houser') {
     logout();
     header('Location: ../login.php');
     exit;
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $deleteId = (int) $_POST['delete_id'];
 
     if ($deleteId > 0) {
-        $stmt = $conn->prepare("DELETE FROM diesel_boilers_acl_cables WHERE id = ?");
+        $stmt = $conn->prepare("DELETE FROM ho_warehouses_electricity_acl_cables WHERE id = ?");
         $stmt->bind_param("i", $deleteId);
         $stmt->execute();
         $stmt->close();
@@ -26,8 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     exit;
 }
 // Fetch data (latest first)
-$sql = "SELECT id,report_year, report_month, diesel_litres, created_by, created_at
-        FROM diesel_boilers_acl_cables
+$sql = "SELECT id,report_year, report_month, electricity_kwh, location_name, created_by, created_at
+        FROM ho_warehouses_electricity_acl_cables
         ORDER BY report_year DESC, 
                  FIELD(report_month,'December','November','October','September','August','July','June','May','April','March','February','January'),
                  created_at DESC LIMIT 15";
@@ -46,7 +46,7 @@ if ($result) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Diesel Consumption – Steam Boilers (View Data)</title>
+<title>Electricity Consumption Head Office & Warehouses – ACL Cables (View Data)</title>
 
 <link rel="stylesheet" href="../styles/indexstyle.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -95,18 +95,18 @@ if ($result) {
         <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
                 <h4 class="mb-1 fw-bold">
-                    <i class="bi bi-fire text-danger"></i>
-                    Monthly Diesel Consumption – Steam Boilers
+                  <i class="bi bi-lightning-charge text-danger"></i>
+                    Monthly Electricity Consumption Head Office & Warehouses – ACL Cables PLC
                 </h4>
                 <div class="text-muted fw-semibold">
-                    ACL Cables PLC | Scope 1 – Direct GHG Emissions
+                    ACL Cables PLC - Head Office | Scope 2 – Indirect GHG Emissions
                 </div>
             </div>
 
             <div class="d-flex gap-2">
               
 
-                <a href="diesel_boilers_acl_cables.php" class="btn btn-success">
+                <a href="electricity_acl_cables_ho_warehouses.php" class="btn btn-success">
                     <i class="bi bi-plus-circle"></i> Enter Data
                 </a>
 
@@ -135,7 +135,8 @@ if ($result) {
                             
                             <th>Year</th>
                             <th>Month</th>
-                            <th class="text-end">Diesel (Litres)</th>
+                            <th>Location</th>
+                            <th class="text-end">Electricity (kWh)</th>
                             <th>Entered By</th>
                             <th>Date Entered</th>
                             <th>Edit/Delete</th>
@@ -147,15 +148,16 @@ if ($result) {
                             
                             <td><?php echo htmlspecialchars($row['report_year']); ?></td>
                             <td><?php echo htmlspecialchars($row['report_month']); ?></td>
+                            <td><?php echo htmlspecialchars($row['location_name']); ?></td>
                             <td class="fw-bold text-end">
-                                <?php echo number_format($row['diesel_litres'], 2); ?>
+                                <?php echo number_format($row['electricity_kwh'], 2); ?>
                             </td>
                             <td><?php echo htmlspecialchars($row['created_by']); ?></td>
                             <td>
                                 <?php echo date('Y-m-d', strtotime($row['created_at'])); ?>
                             </td>
                             <td>
-                               <a href="diesel_boilers_acl_cables_edit_form.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm btn-ghost">
+                               <a href="electricity_acl_cables_ho_warehouses_edit_form.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm btn-ghost">
                     <i class="bi bi-pencil-square"></i> Edit
                 </a>
                 <form method="post" class="d-inline"

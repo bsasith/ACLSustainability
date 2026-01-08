@@ -4,7 +4,7 @@ require_login();
 
 if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
     logout();
-    header('Location: login.php');
+    header('Location: ../login.php');
     exit;
 }
 

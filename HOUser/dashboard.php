@@ -5,7 +5,7 @@ require_login();
 /* Change 'euser' if your Prakash account uses another type (example: 'euser') */
 if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'houser') {
     logout();
-    header('Location: login.php');
+    header('Location: ../login.php');
     exit;
 }
 ?>

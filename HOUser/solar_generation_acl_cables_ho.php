@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../auth.php';
 require_login();
 
-if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
+if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'houser') {
     logout();
     header('Location: ../login.php');
     exit;
@@ -10,8 +10,9 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
 
 /**
  * IMPORTANT:
- * - We use PRG pattern (POST -> Redirect -> GET) so success message shows after redirect
- * - We catch duplicate entry (1062) and show red bootstrap alert
+ * - PRG pattern (POST -> Redirect -> GET) so success message shows after redirect
+ * - Catch duplicate entry (1062) and show red bootstrap alert
+ * - Block future month/year (server-side)
  */
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -21,9 +22,10 @@ $errorMsg = '';
 $success  = isset($_GET['success']); // PRG pattern
 
 // Display values after redirect (GET)
-$dispYear   = $_GET['year'] ?? '';
-$dispMonth  = $_GET['month'] ?? '';
-$dispLitres = $_GET['litres'] ?? '';
+$dispYear  = $_GET['year'] ?? '';
+$dispMonth = $_GET['month'] ?? '';
+// accept both "kwh" (new) and "litres" (old param) just in case
+$dispKwh   = $_GET['kwh'] ?? ($_GET['litres'] ?? '');
 
 $monthsList = [
     'January','February','March','April','May','June',
@@ -39,17 +41,16 @@ $monthsMap = [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $month  = trim($_POST['month'] ?? '');
-    $year   = (int)($_POST['year'] ?? 0);
-    $litres = (float)($_POST['diesel_litres'] ?? -1);
+    $month = trim($_POST['month'] ?? '');
+    $year  = (int)($_POST['year'] ?? 0);
+    $kwh   = (float)($_POST['solar_kwh'] ?? -1);
 
     // Basic validation
-    if ($month === '' || $year <= 0 || $litres < 0) {
+    if ($month === '' || $year <= 0 || $kwh < 0) {
         $errorMsg = "Please fill all fields correctly.";
     } elseif (!isset($monthsMap[$month])) {
         $errorMsg = "Invalid month selected.";
     } else {
-
         // ✅ Block future month/year (server-side)
         $selectedMonth = $monthsMap[$month];
         $currentYear   = (int)date('Y');
@@ -65,32 +66,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // If no error, insert
     if ($errorMsg === '') {
         try {
-            $sql = "INSERT INTO diesel_forklifts_acl_cables
-                    (report_month, report_year, diesel_litres, created_by, company_name, emission_scope, activity_type)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)";
+            // ✅ MATCHES YOUR SQL TABLE:
+            // solar_generation_acl_cables(report_year, report_month, solar_kwh, company_name, energy_type, activity_type, created_by, created_at, updated_at)
+            $sql = "INSERT INTO ho_solar_generation_acl_cables
+                    (report_month, report_year, solar_kwh,location_name	, created_by, company_name, energy_type, activity_type)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-            $conn = db();
             $stmt = $conn->prepare($sql);
 
-            $username       = current_username();
-            $company        = "ACL Cables PLC";
-            $activity_type  = "Forklifts";
-            $emission_scope = "Scope 1";
+            $username      = current_username();
+            $company       = "ACL Cables PLC";
+            $energy_type   = "Solar";
+            $activity_type = "Solar Electricity Generation";
+            $location_name = "Head Office";
 
-            // month(s), year(i), litres(d), created_by(s), company(s), scope(s), activity(s)
-            $stmt->bind_param("sidssss", $month, $year, $litres, $username, $company, $emission_scope, $activity_type);
+            // month(s), year(i), kwh(d), location_name(s), created_by(s), company(s), energy_type(s), activity_type(s)
+            $stmt->bind_param("sidsssss", $month, $year, $kwh, $location_name, $username, $company, $energy_type, $activity_type);
             $stmt->execute();
+            $stmt->close();
 
             // ✅ PRG redirect with success info for display + 3s redirect to dashboard
-            $qMonth  = urlencode($month);
-            $qYear   = urlencode((string)$year);
-            $qLitres = urlencode((string)$litres);
+            $qMonth = urlencode($month);
+            $qYear  = urlencode((string)$year);
+            $qKwh   = urlencode((string)$kwh);
 
-            header("Location: diesel_forklifts_acl_cables.php?success=1&year={$qYear}&month={$qMonth}&litres={$qLitres}");
+            header("Location: solar_generation_acl_cables_ho.php?success=1&year={$qYear}&month={$qMonth}&kwh={$qKwh}");
             exit;
 
         } catch (mysqli_sql_exception $e) {
-
             // Duplicate entry error code in MySQL = 1062
             if ((int)$e->getCode() === 1062) {
                 $errorMsg = "Duplicate entry: Data for <strong>" . htmlspecialchars($month) . " " . htmlspecialchars((string)$year) . "</strong> already exists.";
@@ -108,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Diesel Consumption – Steam Boilers (ACL Cables PLC)</title>
+    <title>Solar Electricity Generation (kWh) – ACL Cables PLC - Head Office</title>
 
     <!-- Existing CSS -->
     <link rel="stylesheet" href="../styles/indexstyle.css">
@@ -204,11 +207,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($success): ?>
             <div class="alert alert-success rounded-4">
                 <i class="bi bi-check-circle-fill"></i>
-                Monthly diesel consumption data saved successfully.
+                Solar electricity generation data saved successfully.
                 <br>
                 <strong>Year:</strong> <?php echo htmlspecialchars($dispYear); ?>,
                 <strong>Month:</strong> <?php echo htmlspecialchars($dispMonth); ?>,
-                <strong>Litres:</strong> <?php echo htmlspecialchars($dispLitres); ?>
+                <strong>kWh:</strong> <?php echo htmlspecialchars($dispKwh); ?>
                 <br>
                 <small class="text-muted">Redirecting to dashboard in 3 seconds…</small>
             </div>
@@ -223,11 +226,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card form-card">
             <div class="form-header">
                 <h2 class="form-title">
-                <i class="bi bi-truck-flatbed kpi-icon"></i>
-                    Monthly Diesel Consumption – Forklifts
+                    <i class="bi bi-sun-fill"></i>
+                    Solar Electricity Generation (kWh) – ACL Cables PLC - Head Office
                 </h2>
                 <div class="form-sub">
-                    ACL Cables PLC | Scope 1 – Direct GHG Emissions
+                    ACL Cables PLC - Head Office | Renewable Energy Generation
                 </div>
             </div>
 
@@ -239,15 +242,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label class="form-label">Month</label>
                         <select name="month" class="form-select" required>
                             <option value="">Select Month</option>
-                            <?php
-                            $months = [
-                                'January','February','March','April','May','June',
-                                'July','August','September','October','November','December'
-                            ];
-                            foreach ($months as $m) {
-                                echo '<option value="'.htmlspecialchars($m).'">'.htmlspecialchars($m).'</option>';
-                            }
-                            ?>
+                            <?php foreach ($monthsList as $m): ?>
+                                <option value="<?php echo htmlspecialchars($m); ?>">
+                                    <?php echo htmlspecialchars($m); ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
 
@@ -265,14 +264,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </select>
                     </div>
 
-                    <!-- Diesel Litres -->
+                    <!-- Solar kWh -->
                     <div class="mb-4">
-                        <label class="form-label">Diesel Consumption (Litres)</label>
+                        <label class="form-label">Solar Electricity Generation (kWh)</label>
                         <input
                             type="number"
-                            name="diesel_litres"
+                            name="solar_kwh"
                             class="form-control"
-                            placeholder="Enter total diesel consumption for the month"
+                            placeholder="Enter total solar generation for the month"
                             step="0.01"
                             min="0"
                             required>
@@ -281,17 +280,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <!-- Submit -->
                     <div class="d-flex justify-content-end">
                         <a href="dashboard.php">
-                        <button type="button" class="btn btn-warning btn-submit">
-                            <i class="bi bi-arrow-left"></i>
-                            Back to Dashboard
-                        </button>
+                            <button type="button" class="btn btn-warning btn-submit">
+                                <i class="bi bi-arrow-left"></i>
+                                Back to Dashboard
+                            </button>
                         </a>
-                        
+
                         <button type="submit" class="btn btn-success btn-submit mx-3">
                             <i class="bi bi-save-fill"></i>
                             Save Monthly Data
                         </button>
-                        
+
                     </div>
 
                 </form>

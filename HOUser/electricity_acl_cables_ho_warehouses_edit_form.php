@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../auth.php';
 require_login();
 
-if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
+if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'houser') {
     logout();
     header('Location: ../login.php');
     exit;
@@ -25,47 +25,46 @@ if ($id <= 0) {
 // --------------------
 // 2) Fetch existing row
 // --------------------
-$sql = "SELECT report_month, report_year, diesel_litres
-        FROM diesel_transport_logistics_acl_complex
+$sql = "SELECT report_month, report_year, electricity_kwh, location_name
+        FROM ho_warehouses_electricity_acl_cables
         WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $result = $stmt->get_result();
-$row = $result->fetch_assoc();
+$editRow = $result->fetch_assoc();
 $stmt->close();
 
-if (!$row) {
+if (!$editRow) {
     die("Record not found.");
 }
+
+$currentLocation = $editRow['location_name'] ?? '';
+
+// --------------------
+// 2B) Fetch locations (for dropdown)
+// --------------------
+$locSql = "SELECT warehouse_name FROM warehouse_locations ORDER BY warehouse_name ASC";
+$locResult = $conn->query($locSql);
 
 // --------------------
 // 3) Handle UPDATE
 // --------------------
-
-// Month map for validation + future blocking
 $monthsMap = [
-    'January' => 1,
-    'February' => 2,
-    'March' => 3,
-    'April' => 4,
-    'May' => 5,
-    'June' => 6,
-    'July' => 7,
-    'August' => 8,
-    'September' => 9,
-    'October' => 10,
-    'November' => 11,
-    'December' => 12
+    'January' => 1, 'February' => 2, 'March' => 3, 'April' => 4,
+    'May' => 5, 'June' => 6, 'July' => 7, 'August' => 8,
+    'September' => 9, 'October' => 10, 'November' => 11, 'December' => 12
 ];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $month  = trim($_POST['month'] ?? '');
-    $year   = (int)($_POST['year'] ?? 0);
-    $litres = (float)($_POST['diesel_litres'] ?? -1);
+    $month         = trim($_POST['month'] ?? '');
+    $year          = (int)($_POST['year'] ?? 0);
+    $kwh           = (float)($_POST['electricity_kwh'] ?? -1);
+    $location_name = trim($_POST['location_name'] ?? '');
 
     // Basic validation
-    if ($month === '' || $year <= 0 || $litres < 0) {
+    if ($month === '' || $year <= 0 || $kwh < 0 || $location_name === '') {
         $errorMsg = "Please fill all fields correctly.";
     } elseif (!isset($monthsMap[$month])) {
         $errorMsg = "Invalid month selected.";
@@ -84,29 +83,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($errorMsg === '') {
         try {
-            $sql = "UPDATE diesel_transport_logistics_acl_complex
+            $upd = "UPDATE ho_warehouses_electricity_acl_cables
                     SET report_month = ?, 
                         report_year = ?, 
-                        diesel_litres = ?, 
+                        electricity_kwh = ?, 
+                        location_name = ?,
                         updated_at = NOW()
                     WHERE id = ?";
 
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sidi", $month, $year, $litres, $id);
+            $stmt = $conn->prepare($upd);
+            $stmt->bind_param("sidsi", $month, $year, $kwh, $location_name, $id);
             $stmt->execute();
             $stmt->close();
 
-            header("Location: diesel_transport_logistics_acl_complex_edit_form.php?id={$id}&success=1");
+            header("Location: electricity_acl_cables_ho_warehouses_edit_form.php?id={$id}&success=1");
             exit;
 
         } catch (mysqli_sql_exception $e) {
             if ((int)$e->getCode() === 1062) {
-                $errorMsg = "Duplicate entry: data for <strong>{$month} {$year}</strong> already exists.";
+                $errorMsg = "Duplicate entry: data for <strong>" . htmlspecialchars($month . ' ' . $year) . "</strong> already exists.";
             } else {
                 $errorMsg = "Database error: " . htmlspecialchars($e->getMessage());
             }
         }
     }
+
+    // ✅ Refresh edit row shown in the form after POST (even if validation fails)
+    $editRow['report_month']     = $month ?: $editRow['report_month'];
+    $editRow['report_year']      = $year ?: $editRow['report_year'];
+    $editRow['electricity_kwh']  = ($kwh >= 0) ? $kwh : $editRow['electricity_kwh'];
+    $currentLocation             = $location_name ?: $currentLocation;
+
+    // re-fetch locations result because the previous loop might have consumed it
+    $locResult = $conn->query($locSql);
 }
 ?>
 
@@ -115,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Diesel Consumption – Transport & Logistics</title>
+<title>Edit Electricity Consumption Head Office & Warehouses – ACL Cables PLC</title>
 
 <link rel="stylesheet" href="../styles/indexstyle.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -188,10 +197,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="form-header">
         <h2 class="form-title">
             <i class="bi bi-pencil-square"></i>
-            Edit Monthly Diesel Consumption – Transport & Logistics
+            Edit Monthly Electricity Consumption Head office & Warehouses – ACL Cables PLC
         </h2>
         <div class="form-sub">
-            ACL Cables PLC | Scope 1 – Direct GHG Emissions
+            ACL Cables PLC - Head Office | Scope 2 – Indirect GHG Emissions
         </div>
     </div>
 
@@ -203,13 +212,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label class="form-label fw-bold">Month</label>
                 <select name="month" class="form-select" required>
                     <?php
-                    $months = [
-                        'January','February','March','April','May','June',
-                        'July','August','September','October','November','December'
-                    ];
+                    $months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
                     foreach ($months as $m) {
-                        $sel = ($m === $row['report_month']) ? 'selected' : '';
-                        echo "<option value=\"$m\" $sel>$m</option>";
+                        $sel = ($m === ($editRow['report_month'] ?? '')) ? 'selected' : '';
+                        echo '<option value="'.htmlspecialchars($m, ENT_QUOTES, 'UTF-8').'" '.$sel.'>'.htmlspecialchars($m).'</option>';
                     }
                     ?>
                 </select>
@@ -222,27 +228,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php
                     $currentYear = (int)date('Y');
                     for ($y = $currentYear; $y >= 2020; $y--) {
-                        $sel = ($y == $row['report_year']) ? 'selected' : '';
+                        $sel = ($y == ($editRow['report_year'] ?? 0)) ? 'selected' : '';
                         echo "<option value=\"$y\" $sel>$y</option>";
                     }
                     ?>
                 </select>
             </div>
 
-            <!-- Litres -->
+            <!-- Location (FIXED) -->
+            <div class="mb-3">
+                <label for="location_id" class="form-label fw-bold">Location</label>
+
+                <select name="location_name" id="location_id" class="form-select shadow-sm" required>
+                    <option value="" disabled <?= ($currentLocation === '') ? 'selected' : '' ?>>
+                        -- Select a location --
+                    </option>
+
+                    <?php while ($loc = $locResult->fetch_assoc()):
+                        $warehouse = $loc['warehouse_name'];
+                        $selected  = ($warehouse === $currentLocation) ? 'selected' : '';
+                    ?>
+                        <option value="<?= htmlspecialchars($warehouse, ENT_QUOTES, 'UTF-8') ?>" <?= $selected ?>>
+                            <?= htmlspecialchars($warehouse, ENT_QUOTES, 'UTF-8') ?>
+                        </option>
+                    <?php endwhile; ?>
+                </select>
+            </div>
+
+            <!-- kWh -->
             <div class="mb-4">
-                <label class="form-label fw-bold">Diesel Consumption (Litres)</label>
+                <label class="form-label fw-bold">Electricity Consumption (kWh)</label>
                 <input type="number"
-                       name="diesel_litres"
+                       name="electricity_kwh"
                        class="form-control"
                        step="0.01"
                        min="0"
-                       value="<?php echo htmlspecialchars($row['diesel_litres']); ?>"
+                       value="<?php echo htmlspecialchars($editRow['electricity_kwh']); ?>"
                        required>
             </div>
 
             <div class="d-flex justify-content-end gap-2">
-                <a href="diesel_transport_logistics_acl_complex_view_edit.php" class="btn btn-outline-secondary btn-submit">
+                <a href="electricity_acl_cables_ho_warehouses_view_edit.php" class="btn btn-outline-secondary btn-submit">
                     <i class="bi bi-table"></i> Back to Table
                 </a>
                 <button type="submit" class="btn btn-success btn-submit">

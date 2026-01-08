@@ -5,7 +5,7 @@ require_login();
 // ✅ AC USER ROLE
 if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
     logout();
-    header('Location: login.php');
+    header('Location: ../login.php');
     exit;
 }
 

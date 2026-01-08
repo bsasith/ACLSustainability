@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../auth.php';
 require_login();
 
-if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
+if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'houser') {
     logout();
     header('Location: ../login.php');
     exit;
@@ -25,8 +25,8 @@ if ($id <= 0) {
 // --------------------
 // 2) Fetch existing row
 // --------------------
-$sql = "SELECT report_month, report_year, diesel_litres
-        FROM diesel_transport_logistics_acl_complex
+$sql = "SELECT report_month, report_year, solar_kwh
+        FROM ho_solar_generation_acl_cables
         WHERE id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id);
@@ -58,14 +58,15 @@ $monthsMap = [
     'November' => 11,
     'December' => 12
 ];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $month  = trim($_POST['month'] ?? '');
-    $year   = (int)($_POST['year'] ?? 0);
-    $litres = (float)($_POST['diesel_litres'] ?? -1);
+    $month = trim($_POST['month'] ?? '');
+    $year  = (int)($_POST['year'] ?? 0);
+    $kwh   = (float)($_POST['solar_kwh'] ?? -1);
 
     // Basic validation
-    if ($month === '' || $year <= 0 || $litres < 0) {
+    if ($month === '' || $year <= 0 || $kwh < 0) {
         $errorMsg = "Please fill all fields correctly.";
     } elseif (!isset($monthsMap[$month])) {
         $errorMsg = "Invalid month selected.";
@@ -84,19 +85,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($errorMsg === '') {
         try {
-            $sql = "UPDATE diesel_transport_logistics_acl_complex
+            $sql = "UPDATE ho_solar_generation_acl_cables
                     SET report_month = ?, 
                         report_year = ?, 
-                        diesel_litres = ?, 
+                        solar_kwh = ?, 
                         updated_at = NOW()
                     WHERE id = ?";
 
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sidi", $month, $year, $litres, $id);
+            $stmt->bind_param("sidi", $month, $year, $kwh, $id);
             $stmt->execute();
             $stmt->close();
 
-            header("Location: diesel_transport_logistics_acl_complex_edit_form.php?id={$id}&success=1");
+            header("Location: solar_generation_acl_cables_ho_edit_form.php?id={$id}&success=1");
             exit;
 
         } catch (mysqli_sql_exception $e) {
@@ -115,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Diesel Consumption – Transport & Logistics</title>
+<title>Edit Solar Electricity Generation – ACL Cables PLC - Head Office</title>
 
 <link rel="stylesheet" href="../styles/indexstyle.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -187,11 +188,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="card form-card">
     <div class="form-header">
         <h2 class="form-title">
-            <i class="bi bi-pencil-square"></i>
-            Edit Monthly Diesel Consumption – Transport & Logistics
+            <i class="bi bi-sun-fill"></i>
+            Edit Solar Electricity Generation – ACL Cables PLC Head Office
         </h2>
         <div class="form-sub">
-            ACL Cables PLC | Scope 1 – Direct GHG Emissions
+            ACL Cables PLC - Head Office | Renewable Energy Generation
         </div>
     </div>
 
@@ -229,20 +230,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
             </div>
 
-            <!-- Litres -->
+            <!-- kWh -->
             <div class="mb-4">
-                <label class="form-label fw-bold">Diesel Consumption (Litres)</label>
+                <label class="form-label fw-bold">Solar Electricity Generation (kWh)</label>
                 <input type="number"
-                       name="diesel_litres"
+                       name="solar_kwh"
                        class="form-control"
                        step="0.01"
                        min="0"
-                       value="<?php echo htmlspecialchars($row['diesel_litres']); ?>"
+                       value="<?php echo htmlspecialchars($row['solar_kwh']); ?>"
                        required>
             </div>
 
             <div class="d-flex justify-content-end gap-2">
-                <a href="diesel_transport_logistics_acl_complex_view_edit.php" class="btn btn-outline-secondary btn-submit">
+                <a href="solar_generation_acl_cables_ho_view_edit.php" class="btn btn-outline-secondary btn-submit">
                     <i class="bi bi-table"></i> Back to Table
                 </a>
                 <button type="submit" class="btn btn-success btn-submit">

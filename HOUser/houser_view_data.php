@@ -3,7 +3,7 @@ require_once __DIR__ . '/../auth.php';
 require_login();
 
 // ✅ E USER ROLE (Prakash)
-if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
+if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'houser') {
     logout();
     header('Location: ../login.php');
     exit;
@@ -41,59 +41,47 @@ function monthCaseSql($col = 'report_month') {
  * Solar table: company_name + energy_type + activity_type
  */
 $KPI = [
-    'diesel_generators_acl_cables' => [
-        'title' => 'Monthly Diesel Consumption – ACL Cables Generators',
-        'value_col' => 'diesel_litres',
+    // ✅ Head Office dashboards (HOUser)
+    'ho_warehouses_electricity_acl_cables' => [
+        'title' => 'H/O & Warehouses Electricity Consumption (kWh) – ACL Cables PLC',
+        'value_col' => 'electricity_kwh',
+        'unit' => 'kWh',
+        'icon' => 'bi-lightning-charge-fill',
+        'company_col' => 'company_name',
+        'scope_col' => 'emission_scope',
+        'activity_col' => 'activity_type',
+        'has_location' => true,
+        'location_col' => 'location_name'
+    ],
+    'ho_senior_managers_fuel_acl_cables' => [
+        'title' => 'H/O Senior Managers Fuel Consumption – ACL Cables PLC',
+        'value_col' => 'fuel_litres',
         'unit' => 'Litres',
-        'icon' => 'bi-fuel-pump-diesel-fill',
+        'icon' => 'bi-person-badge-fill',
         'company_col' => 'company_name',
         'scope_col' => 'emission_scope',
-        'activity_col' => 'activity_type'
+        'activity_col' => 'activity_type',
+        'has_location' => false
     ],
-    'diesel_generators_ceylon_copper' => [
-        'title' => 'Monthly Diesel Consumption – Ceylon Copper Generators',
-        'value_col' => 'diesel_litres',
-        'unit' => 'Litres',
-        'icon' => 'bi-fuel-pump-fill',
-        'company_col' => 'company_name',
-        'scope_col' => 'emission_scope',
-        'activity_col' => 'activity_type'
-    ],
-    'electricity_acl_cables' => [
-        'title' => 'Monthly Electricity Consumption (kWh) ACL Cables',
-        'value_col' => 'electricity_kwh',
-        'unit' => 'kWh',
-        'icon' => 'bi-lightning-charge',
-        'company_col' => 'company_name',
-        'scope_col' => 'emission_scope',
-        'activity_col' => 'activity_type'
-    ],
-    'electricity_acl_metals_alloys' => [
-        'title' => 'Monthly Electricity Consumption (kWh) ACL Metals & Alloys',
-        'value_col' => 'electricity_kwh',
-        'unit' => 'kWh',
-        'icon' => 'bi-plug-fill',
-        'company_col' => 'company_name',
-        'scope_col' => 'emission_scope',
-        'activity_col' => 'activity_type'
-    ],
-    'electricity_ceylon_copper' => [
-        'title' => 'Monthly Electricity Consumption (kWh) Ceylon Copper',
-        'value_col' => 'electricity_kwh',
-        'unit' => 'kWh',
-        'icon' => 'bi-building-fill-check',
-        'company_col' => 'company_name',
-        'scope_col' => 'emission_scope',
-        'activity_col' => 'activity_type'
-    ],
-    'solar_generation_acl_cables' => [
-        'title' => 'Solar Electricity Generation (kWh) ACL Cables',
+    'ho_solar_generation_acl_cables' => [
+        'title' => 'H/O Energy Generation – Solar (kWh) – ACL Cables PLC',
         'value_col' => 'solar_kwh',
         'unit' => 'kWh',
-        'icon' => 'bi-sun',
+        'icon' => 'bi-sun-fill',
         'company_col' => 'company_name',
-        'scope_col' => 'energy_type',   // ✅ solar table uses energy_type
-        'activity_col' => 'activity_type'
+        'scope_col' => 'energy_type',   // shows as Scope/Energy column
+        'activity_col' => 'activity_type',
+        'has_location' => false
+    ],
+    'ho_distribution_fuel_acl_cables' => [
+        'title' => 'H/O Distribution Fuel Consumption – ACL Cables PLC',
+        'value_col' => 'fuel_litres',
+        'unit' => 'Litres',
+        'icon' => 'bi-truck-front-fill',
+        'company_col' => 'company_name',
+        'scope_col' => 'emission_scope',
+        'activity_col' => 'activity_type',
+        'has_location' => false
     ],
 ];
 
@@ -146,6 +134,44 @@ if ($tableSel === '' || !isset($KPI[$tableSel])) {
 $cfg = $KPI[$tableSel];
 
 // -------------------------
+// Optional location filter (only for H/O & Warehouses Electricity)
+// -------------------------
+$locationSel = isset($_GET['loc']) ? trim((string)$_GET['loc']) : '';
+$locations = [];
+
+if (!empty($cfg['has_location'])) {
+    // Prefer master list table if available, fallback to distinct values from data table
+    try {
+        $resLoc = $conn->query("SELECT warehouse_name FROM warehouse_locations ORDER BY warehouse_name ASC");
+        if ($resLoc) {
+            while ($lr = $resLoc->fetch_assoc()) {
+                if (!empty($lr['warehouse_name'])) $locations[] = $lr['warehouse_name'];
+            }
+        }
+    } catch (Throwable $e) {
+        // ignore
+    }
+    if (empty($locations)) {
+        try {
+            $stmtL = $conn->prepare("SELECT DISTINCT location_name AS warehouse_name FROM {$tableSel} ORDER BY location_name ASC");
+            $stmtL->execute();
+            $rL = $stmtL->get_result();
+            while ($lr = $rL->fetch_assoc()) {
+                if (!empty($lr['warehouse_name'])) $locations[] = $lr['warehouse_name'];
+            }
+            $stmtL->close();
+        } catch (Throwable $e) {
+            // ignore
+        }
+    }
+
+    // If selection is not valid, reset to empty (meaning: All)
+    if ($locationSel !== '' && !in_array($locationSel, $locations, true)) {
+        $locationSel = '';
+    }
+}
+
+// -------------------------
 // Query data + totals + chart aggregation
 // -------------------------
 $totalValue = 0.0;
@@ -159,18 +185,27 @@ try {
     $activityCol = $cfg['activity_col'];
 
     // Rows (newest first)
-    $sql = "SELECT id, report_year, report_month,
+    $selectLoc = (!empty($cfg['has_location'])) ? (", {$cfg['location_col']} AS location_name") : "";
+$whereLoc  = (!empty($cfg['has_location']) && $locationSel !== '') ? (" AND {$cfg['location_col']} = ?") : "";
+
+$sql = "SELECT id, report_year, report_month,
                    $valCol AS kpi_value,
                    $companyCol AS company_name,
                    $scopeCol AS kpi_scope,
-                   $activityCol AS activity_type,
+                   $activityCol AS activity_type
+                   $selectLoc,
                    created_by, created_at
             FROM $tableSel
             WHERE (report_year * 100 + $case) BETWEEN ? AND ?
+                  $whereLoc
             ORDER BY (report_year * 100 + $case) DESC, created_at DESC";
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ii", $startKey, $endKey);
+$stmt = $conn->prepare($sql);
+    if (!empty($cfg['has_location']) && $locationSel !== '') {
+        $stmt->bind_param("iis", $startKey, $endKey, $locationSel);
+    } else {
+        $stmt->bind_param("ii", $startKey, $endKey);
+    }
     $stmt->execute();
     $res = $stmt->get_result();
 
@@ -209,7 +244,11 @@ $totalUnit   = $cfg['unit'] ?? 'Units';
 // -------------------------
 if (isset($_GET['download']) && $_GET['download'] === 'csv' && empty($errorMsg)) {
 
-    $fname = 'kpi_' . preg_replace('/[^a-zA-Z0-9_-]+/', '_', $tableSel) . '_' . $startPeriod . '_to_' . $endPeriod . '.csv';
+    $fnameBase = 'kpi_' . preg_replace('/[^a-zA-Z0-9_-]+/', '_', $tableSel);
+    if (!empty($cfg['has_location']) && $locationSel !== '') {
+        $fnameBase .= '_' . preg_replace('/[^a-zA-Z0-9_-]+/', '_', $locationSel);
+    }
+    $fname = $fnameBase . '_' . $startPeriod . '_to_' . $endPeriod . '.csv';
 
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="'.$fname.'"');
@@ -217,23 +256,32 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv' && empty($errorMsg))
     header('Expires: 0');
 
     $out = fopen('php://output', 'w');
-    fputcsv($out, ['KPI', 'Company', 'Scope/Energy', 'Activity', 'Year', 'Month', 'Value', 'Unit', 'Entered By', 'Date Entered']);
+    $csvHead = ['KPI', 'Company', 'Scope/Energy', 'Activity'];
+    if (!empty($cfg['has_location'])) { $csvHead[] = 'Location'; }
+    array_push($csvHead, 'Year', 'Month', 'Value', 'Unit', 'Entered By', 'Date Entered');
+    fputcsv($out, $csvHead);
 
     foreach ($data as $r) {
         $val = isset($r['kpi_value']) ? (float)$r['kpi_value'] : 0.0;
 
-        fputcsv($out, [
+        $rowOut = [
             $cfg['title'],
             $r['company_name'] ?? '',
             $r['kpi_scope'] ?? '',
             $r['activity_type'] ?? '',
+        ];
+        if (!empty($cfg['has_location'])) {
+            $rowOut[] = $r['location_name'] ?? '';
+        }
+        array_push($rowOut,
             $r['report_year'] ?? '',
             $r['report_month'] ?? '',
             number_format($val, 2, '.', ''),
             $totalUnit,
             $r['created_by'] ?? '',
             isset($r['created_at']) ? date('Y-m-d', strtotime($r['created_at'])) : ''
-        ]);
+        );
+        fputcsv($out, $rowOut);
     }
 
     fclose($out);
@@ -245,7 +293,7 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv' && empty($errorMsg))
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Period Results – EUser</title>
+<title>Period Results – HOUser</title>
 
 <link rel="stylesheet" href="../styles/indexstyle.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -338,6 +386,19 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv' && empty($errorMsg))
                     </select>
                 </div>
 
+                <!-- Location filter (only for H/O & Warehouses Electricity) -->
+                <div id="locWrap" style="<?php echo (!empty($cfg['has_location'])) ? '' : 'display:none;'; ?>">
+                    <label class="form-label">Location</label>
+                    <select name="loc" class="form-select">
+                        <option value="">All Locations</option>
+                        <?php foreach ($locations as $loc): ?>
+                            <option value="<?php echo htmlspecialchars($loc); ?>" <?php echo ($locationSel===$loc)?'selected':''; ?>>
+                                <?php echo htmlspecialchars($loc); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
                 <div class="ms-auto d-flex gap-2">
                     <button class="btn btn-success btn-ghost" name="submit" value="1">
                         <i class="bi bi-search"></i> Show Results
@@ -380,6 +441,9 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv' && empty($errorMsg))
                                 <th>Company</th>
                                 <th>Scope/Energy</th>
                                 <th>Activity</th>
+                                <?php if (!empty($cfg['has_location'])): ?>
+                                    <th>Location</th>
+                                <?php endif; ?>
                                 <th>Year</th>
                                 <th>Month</th>
                                 <th class="text-end">Value</th>
@@ -421,6 +485,9 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv' && empty($errorMsg))
                             <div class="total-sub">
                                 KPI: <?php echo htmlspecialchars($cfg['title']); ?> |
                                 Period: <?php echo htmlspecialchars($startPeriod); ?> to <?php echo htmlspecialchars($endPeriod); ?>
+                                <?php if (!empty($cfg['has_location']) && $locationSel !== ''): ?>
+                                    | Location: <?php echo htmlspecialchars($locationSel); ?>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -459,6 +526,20 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv' && empty($errorMsg))
     <?php endif; ?>
 
 </div>
+
+<script>
+(function(){
+    const kpiSel = document.querySelector('select[name="kpi"]');
+    const locWrap = document.getElementById('locWrap');
+    if (!kpiSel || !locWrap) return;
+    const target = 'ho_warehouses_electricity_acl_cables';
+    const toggle = () => {
+        locWrap.style.display = (kpiSel.value === target) ? '' : 'none';
+    };
+    kpiSel.addEventListener('change', toggle);
+    toggle();
+})();
+</script>
 
 <?php if (!$errorMsg && !empty($data) && !empty($chartLabels)): ?>
 <script>

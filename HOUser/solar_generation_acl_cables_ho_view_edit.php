@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../auth.php';
 require_login();
 
-if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
+if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'houser') {
     logout();
     header('Location: ../login.php');
     exit;
@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     $deleteId = (int) $_POST['delete_id'];
 
     if ($deleteId > 0) {
-        $stmt = $conn->prepare("DELETE FROM diesel_boilers_acl_cables WHERE id = ?");
+        $stmt = $conn->prepare("DELETE FROM ho_solar_generation_acl_cables WHERE id = ?");
         $stmt->bind_param("i", $deleteId);
         $stmt->execute();
         $stmt->close();
@@ -25,17 +25,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     header("Location: ".$_SERVER['PHP_SELF']);
     exit;
 }
-// Fetch data (latest first)
-$sql = "SELECT id,report_year, report_month, diesel_litres, created_by, created_at
-        FROM diesel_boilers_acl_cables
-        ORDER BY report_year DESC, 
+/*
+  ✅ SOLAR TABLE (Correct):
+  solar_generation_acl_cables
+  Columns:
+    - solar_kwh  (NOT electricity_kwh)
+*/
+
+$sql = "SELECT id, report_year, report_month, solar_kwh, created_by, created_at
+        FROM ho_solar_generation_acl_cables
+        ORDER BY report_year DESC,
                  FIELD(report_month,'December','November','October','September','August','July','June','May','April','March','February','January'),
-                 created_at DESC LIMIT 15";
+                 created_at DESC
+        LIMIT 15";
 
 $result = $conn->query($sql);
 if ($result) {
     while ($row = $result->fetch_assoc()) {
-        $id = $row['id'];
         $data[] = $row;
     }
 }
@@ -46,7 +52,7 @@ if ($result) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Diesel Consumption – Steam Boilers (View Data)</title>
+<title>Solar Electricity Generation – ACL Cables PLC - Head Office (View Data)</title>
 
 <link rel="stylesheet" href="../styles/indexstyle.css">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -59,23 +65,16 @@ if ($result) {
     margin:40px auto;
     padding:0 15px;
 }
-
 .card-ui{
     border:none;
     border-radius:16px;
     box-shadow:0 10px 25px rgba(0,0,0,.08);
 }
-
 .table thead th{
     background:#f8fafc;
     font-weight:800;
     color:#0f172a;
 }
-
-.badge-scope1{
-    background:#ef4444;
-}
-
 </style>
 </head>
 
@@ -95,18 +94,16 @@ if ($result) {
         <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
                 <h4 class="mb-1 fw-bold">
-                    <i class="bi bi-fire text-danger"></i>
-                    Monthly Diesel Consumption – Steam Boilers
+                    <i class="bi bi-sun-fill text-success"></i>
+                    Solar Electricity Generation (kWh) – ACL Cables PLC - Head Office
                 </h4>
                 <div class="text-muted fw-semibold">
-                    ACL Cables PLC | Scope 1 – Direct GHG Emissions
+                    Renewable Energy Generation
                 </div>
             </div>
 
             <div class="d-flex gap-2">
-              
-
-                <a href="diesel_boilers_acl_cables.php" class="btn btn-success">
+                <a href="solar_generation_acl_cables_ho.php" class="btn btn-success">
                     <i class="bi bi-plus-circle"></i> Enter Data
                 </a>
 
@@ -132,10 +129,9 @@ if ($result) {
                 <table class="table table-hover align-middle">
                     <thead>
                         <tr>
-                            
                             <th>Year</th>
                             <th>Month</th>
-                            <th class="text-end">Diesel (Litres)</th>
+                            <th class="text-end">Solar (kWh)</th>
                             <th>Entered By</th>
                             <th>Date Entered</th>
                             <th>Edit/Delete</th>
@@ -144,21 +140,19 @@ if ($result) {
                     <tbody>
                         <?php foreach ($data as $row): ?>
                         <tr>
-                            
                             <td><?php echo htmlspecialchars($row['report_year']); ?></td>
                             <td><?php echo htmlspecialchars($row['report_month']); ?></td>
                             <td class="fw-bold text-end">
-                                <?php echo number_format($row['diesel_litres'], 2); ?>
+                                <?php echo number_format((float)$row['solar_kwh'], 2); ?>
                             </td>
                             <td><?php echo htmlspecialchars($row['created_by']); ?></td>
+                            <td><?php echo date('Y-m-d', strtotime($row['created_at'])); ?></td>
                             <td>
-                                <?php echo date('Y-m-d', strtotime($row['created_at'])); ?>
-                            </td>
-                            <td>
-                               <a href="diesel_boilers_acl_cables_edit_form.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm btn-ghost">
-                    <i class="bi bi-pencil-square"></i> Edit
-                </a>
-                <form method="post" class="d-inline"
+                                <a href="solar_generation_acl_cables_ho_edit_form.php?id=<?php echo (int)$row['id']; ?>"
+                                   class="btn btn-warning btn-sm btn-ghost">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <form method="post" class="d-inline"
                                                 onsubmit="return confirm('Are you sure you want to delete this record?');">
                                                 <input type="hidden" name="delete_id" value="<?php echo (int)$row['id']; ?>">
                                                 <button type="submit" class="btn btn-danger btn-sm">
