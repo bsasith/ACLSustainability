@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../auth.php';
 require_login();
 
-// ✅ E USER ROLE (Prakash)
+// ✅ HO USER ROLE
 if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'houser') {
     logout();
     header('Location: ../login.php');
@@ -142,24 +142,25 @@ $locations = [];
 if (!empty($cfg['has_location'])) {
     // Prefer master list table if available, fallback to distinct values from data table
     try {
-        $resLoc = $conn->query("SELECT warehouse_name FROM warehouse_locations ORDER BY warehouse_name ASC");
+        $resLoc = $conn->query("SELECT warehouse_name FROM warehouse_locations WHERE warehouse_name IS NOT NULL AND warehouse_name <> '' ORDER BY warehouse_name ASC");
         if ($resLoc) {
             while ($lr = $resLoc->fetch_assoc()) {
-                if (!empty($lr['warehouse_name'])) $locations[] = $lr['warehouse_name'];
+                $locations[] = (string)$lr['warehouse_name'];
             }
         }
     } catch (Throwable $e) {
-        // ignore
+        // ignore and fallback
     }
+
     if (empty($locations)) {
         try {
-            $stmtL = $conn->prepare("SELECT DISTINCT location_name AS warehouse_name FROM {$tableSel} ORDER BY location_name ASC");
-            $stmtL->execute();
-            $rL = $stmtL->get_result();
-            while ($lr = $rL->fetch_assoc()) {
-                if (!empty($lr['warehouse_name'])) $locations[] = $lr['warehouse_name'];
+            // Fallback: pull distinct locations from the data table itself
+            $resLoc2 = $conn->query("SELECT DISTINCT location_name AS warehouse_name FROM {$tableSel} WHERE location_name IS NOT NULL AND location_name <> '' ORDER BY location_name ASC");
+            if ($resLoc2) {
+                while ($lr = $resLoc2->fetch_assoc()) {
+                    $locations[] = (string)$lr['warehouse_name'];
+                }
             }
-            $stmtL->close();
         } catch (Throwable $e) {
             // ignore
         }
@@ -185,22 +186,34 @@ try {
     $activityCol = $cfg['activity_col'];
 
     // Rows (newest first)
-    $selectLoc = (!empty($cfg['has_location'])) ? (", {$cfg['location_col']} AS location_name") : "";
-$whereLoc  = (!empty($cfg['has_location']) && $locationSel !== '') ? (" AND {$cfg['location_col']} = ?") : "";
+    $selectFields = [
+        'id',
+        'report_year',
+        'report_month',
+        "$valCol AS kpi_value",
+        "$companyCol AS company_name",
+        "$scopeCol AS kpi_scope",
+        "$activityCol AS activity_type",
+    ];
 
-$sql = "SELECT id, report_year, report_month,
-                   $valCol AS kpi_value,
-                   $companyCol AS company_name,
-                   $scopeCol AS kpi_scope,
-                   $activityCol AS activity_type
-                   $selectLoc,
-                   created_by, created_at
+    // Location column only for H/O & Warehouses Electricity
+    if (!empty($cfg['has_location'])) {
+        $locCol = $cfg['location_col'] ?? 'location_name';
+        $selectFields[] = "$locCol AS location_name";
+    }
+
+    $selectFields[] = 'created_by';
+    $selectFields[] = 'created_at';
+
+    $whereLoc = (!empty($cfg['has_location']) && $locationSel !== '') ? (" AND " . ($cfg['location_col'] ?? 'location_name') . " = ?") : "";
+
+    $sql = "SELECT " . implode(", ", $selectFields) . "
             FROM $tableSel
             WHERE (report_year * 100 + $case) BETWEEN ? AND ?
                   $whereLoc
             ORDER BY (report_year * 100 + $case) DESC, created_at DESC";
 
-$stmt = $conn->prepare($sql);
+    $stmt = $conn->prepare($sql);
     if (!empty($cfg['has_location']) && $locationSel !== '') {
         $stmt->bind_param("iis", $startKey, $endKey, $locationSel);
     } else {
@@ -457,6 +470,10 @@ if (isset($_GET['download']) && $_GET['download'] === 'csv' && empty($errorMsg))
                                     <td class="text-muted fw-semibold"><?php echo htmlspecialchars($r['company_name'] ?? ''); ?></td>
                                     <td class="text-muted fw-semibold"><?php echo htmlspecialchars($r['kpi_scope'] ?? ''); ?></td>
                                     <td class="text-muted fw-semibold"><?php echo htmlspecialchars($r['activity_type'] ?? ''); ?></td>
+
+                                    <?php if (!empty($cfg['has_location'])): ?>
+                                        <td><?php echo htmlspecialchars($r['location_name'] ?? ''); ?></td>
+                                    <?php endif; ?>
 
                                     <td><?php echo htmlspecialchars($r['report_year']); ?></td>
                                     <td><?php echo htmlspecialchars($r['report_month']); ?></td>

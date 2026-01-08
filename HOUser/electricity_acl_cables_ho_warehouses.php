@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Duplicate entry error code in MySQL = 1062
             if ((int)$e->getCode() === 1062) {
-                $errorMsg = "Duplicate entry: Data for <strong>" . htmlspecialchars($month) . " " . htmlspecialchars((string)$year) . "</strong> already exists.";
+                $errorMsg = "Duplicate entry: Data for <strong>" . htmlspecialchars($month) . " " . htmlspecialchars((string)$year) . " " . htmlspecialchars((string)$location_name) . "</strong> already exists.";
             } else {
                 $errorMsg = "Database error: " . htmlspecialchars($e->getMessage());
             }

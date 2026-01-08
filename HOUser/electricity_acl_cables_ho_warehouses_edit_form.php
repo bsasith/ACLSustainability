@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } catch (mysqli_sql_exception $e) {
             if ((int)$e->getCode() === 1062) {
-                $errorMsg = "Duplicate entry: data for <strong>" . htmlspecialchars($month . ' ' . $year) . "</strong> already exists.";
+                $errorMsg = "Duplicate entry: data for <strong>" . htmlspecialchars($month . ' ' . $year . ' ' . $location_name) . "</strong> already exists.";
             } else {
                 $errorMsg = "Database error: " . htmlspecialchars($e->getMessage());
             }
