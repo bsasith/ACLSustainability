@@ -182,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Welcome <?php echo htmlspecialchars(current_username()); ?>
         </h1>
 
-        <a href="logout.php">
+        <a href="../logout.php">
             <h1 class="topbar-logout">Logout &nbsp;</h1>
         </a>
 

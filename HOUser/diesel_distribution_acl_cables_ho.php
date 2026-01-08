@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../auth.php';
 require_login();
 
-if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
+if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'houser') {
     logout();
     header('Location: login.php');
     exit;
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $month  = trim($_POST['month'] ?? '');
     $year   = (int)($_POST['year'] ?? 0);
-    $litres = (float)($_POST['electricity_kwh'] ?? -1);
+    $litres = (float)($_POST['fuel_litres'] ?? -1);
 
     // Basic validation
     if ($month === '' || $year <= 0 || $litres < 0) {
@@ -65,17 +65,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // If no error, insert
     if ($errorMsg === '') {
         try {
-            $sql = "INSERT INTO electricity_acl_metals_alloys
-                    (report_month, report_year, electricity_kwh, created_by, company_name, emission_scope, activity_type)
+            $sql = "INSERT INTO ho_distribution_fuel_acl_cables
+                    (report_month, report_year, fuel_litres, created_by, company_name, emission_scope, activity_type)
                     VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             $conn = db();
             $stmt = $conn->prepare($sql);
 
             $username       = current_username();
-            $company        = "ACL Metals & Alloys PLC";
-            $activity_type  = "Electricity Consumption";
-            $emission_scope = "Scope 2";
+            $company        = "ACL Cables PLC";
+            $activity_type  = "Vehicles Distribution";
+            $emission_scope = "Scope 1";
 
             // month(s), year(i), litres(d), created_by(s), company(s), scope(s), activity(s)
             $stmt->bind_param("sidssss", $month, $year, $litres, $username, $company, $emission_scope, $activity_type);
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $qYear   = urlencode((string)$year);
             $qLitres = urlencode((string)$litres);
 
-            header("Location: electricity_acl_metals.php?success=1&year={$qYear}&month={$qMonth}&litres={$qLitres}");
+            header("Location: diesel_distribution_acl_cables_ho.php?success=1&year={$qYear}&month={$qMonth}&litres={$qLitres}");
             exit;
 
         } catch (mysqli_sql_exception $e) {
@@ -108,8 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <title>Monthly Electricity Consumption – ACL Metals & Alloys PLC</title>
+    <title>Monthly Fuel Consumption – Distribution (ACL Cables PLC Head Office)</title>
 
     <!-- Existing CSS -->
     <link rel="stylesheet" href="../styles/indexstyle.css">
@@ -205,11 +204,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($success): ?>
             <div class="alert alert-success rounded-4">
                 <i class="bi bi-check-circle-fill"></i>
-                Monthly electricity consumption data saved successfully.
+                Monthly fuel consumption data saved successfully.
                 <br>
                 <strong>Year:</strong> <?php echo htmlspecialchars($dispYear); ?>,
                 <strong>Month:</strong> <?php echo htmlspecialchars($dispMonth); ?>,
-                <strong>kWh:</strong> <?php echo htmlspecialchars($dispLitres); ?>
+                <strong>Litres:</strong> <?php echo htmlspecialchars($dispLitres); ?>
                 <br>
                 <small class="text-muted">Redirecting to dashboard in 3 seconds…</small>
             </div>
@@ -224,10 +223,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card form-card">
             <div class="form-header">
                 <h2 class="form-title">
-                    <i class="bi bi-plug-fill kpi-icon"></i>
-                    Monthly Electricity Consumption – ACL Metals & Alloys PLC</h2>
+                    
+                    <i class="bi bi-car-front-fill kpi-icon"></i>
+                    Monthly Fuel Consumption – Distribution Vehicles Head Office
+                </h2>
                 <div class="form-sub">
-                    ACL Metals & Alloys PLC | Scope 2 – Indirect GHG Emissions
+                    ACL Cables PLC - Head Office | Scope 1 – Direct GHG Emissions
                 </div>
             </div>
 
@@ -265,14 +266,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </select>
                     </div>
 
-                    <!-- Electricity kWh -->
+                    <!-- Diesel Litres -->
                     <div class="mb-4">
-                        <label class="form-label">Electricity Consumption (kWh)</label>
+                        <label class="form-label">Fuel Consumption (Litres)</label>
                         <input
                             type="number"
-                            name="electricity_kwh"
+                            name="fuel_litres"
                             class="form-control"
-                            placeholder="Enter total electricity consumption for the month"
+                            placeholder="Enter total fuel consumption for the month"
                             step="0.01"
                             min="0"
                             required>

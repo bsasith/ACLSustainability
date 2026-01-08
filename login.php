@@ -18,13 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($ok) {
           if($_SESSION['utype']==='euser')
             header('Location: .\EUser\dashboard.php');
-          if($_SESSION['utype']==='fuser')
-            header('Location: .\FUser\dashboard.php');
+          if($_SESSION['utype']==='houser')
+            header('Location: .\HOUser\dashboard.php');
           if($_SESSION['utype']==='acuser')
             header('Location: .\AcUser\dashboard.php');
-          if($_SESSION['utype']==='admin')
-            header('Location: .\Admin\dashboard.php');
-            exit;
+          exit;
         }
         $error = $msg ?: 'Login failed.';
     }
@@ -65,7 +63,7 @@ body{
             </div>
         <?php endif; ?>
 
-        <form method="post" action="login.php" autocomplete="off">
+        <form method="post" action="login.php" >
             <input type="hidden" name="csrf" value="<?php echo htmlspecialchars($token); ?>">
 
             <div class="mb-3">

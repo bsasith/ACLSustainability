@@ -1,0 +1,347 @@
+<?php
+require_once __DIR__ . '/../auth.php';
+require_login();
+
+/* Change 'euser' if your Prakash account uses another type (example: 'euser') */
+if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'houser') {
+    logout();
+    header('Location: login.php');
+    exit;
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Head Office User – Sustainability Dashboard</title>
+
+<link rel="stylesheet" href="../styles/indexstyle.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jockey+One&display=swap" rel="stylesheet">
+
+<style>
+/* ===== Same UI pattern as your dashboard (non-click rows, only buttons) ===== */
+.content-wrap{
+    max-width:1100px;
+    margin:40px auto;
+    padding:0 15px;
+}
+
+.header-card{
+    border:none;
+    border-radius:16px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+    margin-bottom:18px;
+    overflow:hidden;
+}
+
+.header-card .card-body{
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 60%, #f0f9ff 100%);
+}
+
+.section-card{
+    border:none;
+    border-radius:16px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+    overflow:hidden;
+    margin-bottom:18px;
+}
+
+.section-top{
+    padding:18px 20px;
+    border-bottom:1px solid #e5e7eb;
+    background:#f8fafc;
+}
+
+.section-title{
+    margin:0;
+    font-family:"Jockey One", sans-serif;
+    font-size:22px;
+    color:#0f172a;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.section-sub{
+    margin-top:6px;
+    color:#64748b;
+    font-weight:600;
+    font-size:.95rem;
+}
+
+.kpi-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:16px 20px;
+    border-bottom:1px solid #e5e7eb;
+    gap:14px;
+}
+
+.kpi-row:last-child{ border-bottom:none; }
+
+.kpi-left{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    min-width:0;
+}
+
+.kpi-icon{
+    font-size:1.25rem;
+    color:#0f766e;
+    margin-top:3px;
+    flex:0 0 auto;
+}
+
+.kpi-text{
+    font-weight:800;
+    color:#0f172a;
+    line-height:1.25;
+}
+
+.kpi-meta{
+    display:block;
+    margin-top:6px;
+    font-size:.9rem;
+    color:#64748b;
+    font-weight:600;
+}
+
+.kpi-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+}
+
+.badge-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 12px;
+    border-radius:999px;
+    font-size:.78rem;
+    letter-spacing:.4px;
+    white-space:nowrap;
+}
+
+.badge-scope1{ background:#ef4444; color:#fff; }
+.badge-scope2{ background:#2563eb; color:#fff; }
+.badge-renew  { background:#16a34a; color:#fff; }
+
+.btn-ghost{ border-radius:999px; }
+
+@media (max-width: 768px){
+    .kpi-row{ align-items:flex-start; flex-direction:column; }
+    .kpi-actions{ width:100%; justify-content:flex-start; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== HEADER (UNCHANGED) ===== -->
+<div class="topbar">
+    <h1 class="topbar-text">Welcome <?php echo htmlspecialchars(current_username()); ?></h1>
+    <a href="../logout.php"><h1 class="topbar-logout">Logout &nbsp;</h1></a>
+    <h1 class="topbar-username"><?php echo htmlspecialchars(current_username()); ?>&nbsp;</h1>
+</div>
+
+<div class="content-wrap">
+
+    <!-- Responsible Department Card -->
+    <div class="card header-card">
+        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-people-fill text-primary fs-5"></i>
+                <div>
+                    <div class="fw-bold text-dark">Responsible  </div>
+                    <div class="text-muted fw-semibold">Head Office</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= Scope 1 ================= -->
+    <div class="card section-card">
+        <div class="section-top">
+            <h2 class="section-title">
+                <i class="bi bi-cloud-minus-fill text-danger"></i>
+                Fossil Fuel Consumption (Scope 1 : Direct GHG Emissions)
+            </h2>
+            <div class="section-sub">Monthly diesel consumption tracking </div>
+        </div>
+
+        <!-- a) Diesel – Standby Generators (ACL Cables PLC) -->
+        <div class="kpi-row">
+            <div class="kpi-left">
+                <i class="bi bi-fuel-pump-diesel-fill kpi-icon"></i>
+                <div>
+                    <div class="kpi-text">Monthly Senior Managers Fuel Consumption - Head Office </div>
+                    <span class="kpi-meta">ACL Cables PLC - Head Office</span>
+                </div>
+            </div>
+            <div class="kpi-actions">
+                <span class="badge-pill badge-scope1"><i class="bi bi-cloud-minus-fill"></i> Scope 1</span>
+                <a href="diesel_senior_acl_cables_ho.php" class="btn btn-success btn-sm btn-ghost">
+                    <i class="bi bi-plus-circle"></i> Enter Data
+                </a>
+                <a href="diesel_senior_acl_cables_ho_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
+                    <i class="bi bi-pencil-square"></i> Edit / View
+                </a>
+            </div>
+        </div>
+
+        <!-- b) Diesel – Standby Generators (Ceylon Copper Pvt Ltd) -->
+        <div class="kpi-row">
+            <div class="kpi-left">
+                <i class="bi bi-fuel-pump-fill kpi-icon"></i>
+                <div>
+                    <div class="kpi-text">Distribution Fuel Consumption</div>
+                    <span class="kpi-meta">ACL Cables PLC - Head Office</span>
+                </div>
+            </div>
+            <div class="kpi-actions">
+                <span class="badge-pill badge-scope1"><i class="bi bi-cloud-minus-fill"></i> Scope 1</span>
+                <a href="diesel_distribution_acl_cables_ho.php" class="btn btn-success btn-sm btn-ghost">
+                    <i class="bi bi-plus-circle"></i> Enter Data
+                </a>
+                <a href="diesel_distribution_acl_cables_ho_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
+                    <i class="bi bi-pencil-square"></i> Edit / View
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= Scope 2 ================= -->
+    <div class="card section-card">
+        <div class="section-top">
+            <h2 class="section-title">
+                <i class="bi bi-lightning-charge-fill text-primary"></i>
+                Electricity Consumption (Scope 2: Indirect GHG Emissions)
+            </h2>
+            <div class="section-sub">Monthly electricity consumption tracking (kWh)</div>
+        </div>
+
+        <!-- a) Electricity – ACL Cables PLC -->
+        <div class="kpi-row">
+            <div class="kpi-left">
+                <i class="bi bi-lightning-charge kpi-icon"></i>
+                <div>
+                    <div class="kpi-text">H/O & Warehouses Electricity Consumption (kWh)</div>
+                    <span class="kpi-meta">ACL Cables PLC</span>
+                </div>
+            </div>
+            <div class="kpi-actions">
+                <span class="badge-pill badge-scope2"><i class="bi bi-cloud-fill"></i> Scope 2</span>
+                <a href="electricity_acl_cables_ho_warehouses.php" class="btn btn-success btn-sm btn-ghost">
+                    <i class="bi bi-plus-circle"></i> Enter Data
+                </a>
+                <a href="electricity_acl_cables_ho_warehouses_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
+                    <i class="bi bi-pencil-square"></i> Edit / View
+                </a>
+            </div>
+        </div>
+
+        <!-- b) Electricity – ACL Metals -->
+        <!-- <div class="kpi-row">
+            <div class="kpi-left">
+                <i class="bi bi-plug-fill kpi-icon"></i>
+                <div>
+                    <div class="kpi-text">b) Monthly Electricity Consumption (kWh)</div>
+                    <span class="kpi-meta">ACL Metals & Alloys</span>
+                </div>
+            </div>
+            <div class="kpi-actions">
+                <span class="badge-pill badge-scope2"><i class="bi bi-cloud-fill"></i> Scope 2</span>
+                <a href="electricity_acl_metals.php" class="btn btn-success btn-sm btn-ghost">
+                    <i class="bi bi-plus-circle"></i> Enter Data
+                </a>
+                <a href="electricity_acl_metals_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
+                    <i class="bi bi-pencil-square"></i> Edit / View
+                </a>
+            </div>
+        </div> -->
+
+        <!-- c) Electricity – Ceylon Copper -->
+        <!-- <div class="kpi-row">
+            <div class="kpi-left">
+                <i class="bi bi-building-fill-check kpi-icon"></i>
+                <div>
+                    <div class="kpi-text">c) Monthly Electricity Consumption (kWh)</div>
+                    <span class="kpi-meta">Ceylon Copper</span>
+                </div>
+            </div>
+            <div class="kpi-actions">
+                <span class="badge-pill badge-scope2"><i class="bi bi-cloud-fill"></i> Scope 2</span>
+                <a href="electricity_ceylon_copper.php" class="btn btn-success btn-sm btn-ghost">
+                    <i class="bi bi-plus-circle"></i> Enter Data
+                </a>
+                <a href="electricity_ceylon_copper_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
+                    <i class="bi bi-pencil-square"></i> Edit / View
+                </a>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- ================= Renewable ================= -->
+    <div class="card section-card">
+        <div class="section-top">
+            <h2 class="section-title">
+                <i class="bi bi-sun-fill text-success"></i>
+                Renewable Energy Generation
+            </h2>
+            <div class="section-sub">Monthly renewable energy generation tracking</div>
+        </div>
+
+        <!-- a) Solar – ACL Cables PLC -->
+        <div class="kpi-row">
+            <div class="kpi-left">
+                <i class="bi bi-sun kpi-icon"></i>
+                <div>
+                    <div class="kpi-text">Solar Electricity Generation (kWh)</div>
+                    <span class="kpi-meta">ACL Cables PLC Head Office</span>
+                </div>
+            </div>
+            <div class="kpi-actions">
+                <span class="badge-pill badge-renew"><i class="bi bi-leaf-fill"></i> Renewable</span>
+                <a href="solar_generation_acl_cables_ho.php" class="btn btn-success btn-sm btn-ghost">
+                    <i class="bi bi-plus-circle"></i> Enter Data
+                </a>
+                <a href="solar_generation_acl_cables_ho_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
+                    <i class="bi bi-pencil-square"></i> Edit / View
+                </a>
+            </div>
+        </div>
+
+    </div>
+<br>
+<br>
+        <!-- a) Downlaod CSV -->
+        <div class="kpi-row">
+            <div class="kpi-left">
+                 <i class="bi bi-download text-danger"></i>
+                <div>
+                    <div class="kpi-text">View and Download Data</div>
+                    <span class="kpi-meta">Download previously entered data for certain periods</span>
+                </div>
+            </div>
+            <div class="kpi-actions">
+               
+                <a href="houser_view_data.php" class="btn btn-success btn-sm btn-ghost">
+                    <i class="bi bi-plus-circle"></i> Download/View Data
+                </a>
+                <!-- <a href="diesel_boilers_acl_cables_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
+                    <i class="bi bi-pencil-square"></i> Edit / View
+                </a> -->
+            </div>
+        </div>
+</div>
+</body>
+</html>

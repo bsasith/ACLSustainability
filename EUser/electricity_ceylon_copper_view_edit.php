@@ -10,7 +10,21 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
 
 $conn = db();
 $data = [];
+// ---------- DELETE RECORD ----------
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
+    $deleteId = (int) $_POST['delete_id'];
 
+    if ($deleteId > 0) {
+        $stmt = $conn->prepare("DELETE FROM electricity_ceylon_copper WHERE id = ?");
+        $stmt->bind_param("i", $deleteId);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    // Refresh page so deleted record disappears
+    header("Location: ".$_SERVER['PHP_SELF']);
+    exit;
+}
 // Fetch data (latest first)
 $sql = "SELECT id,report_year, report_month, electricity_kwh, created_by, created_at
         FROM electricity_ceylon_copper
@@ -124,7 +138,7 @@ if ($result) {
                             <th class="text-end">Electricity (kWh)</th>
                             <th>Entered By</th>
                             <th>Date Entered</th>
-                            <th>Edit</th>
+                            <th>Edit/Delete</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -144,6 +158,13 @@ if ($result) {
                                <a href="electricity_ceylon_copper_edit_form.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm btn-ghost">
                     <i class="bi bi-pencil-square"></i> Edit
                 </a>
+                <form method="post" class="d-inline"
+                                                onsubmit="return confirm('Are you sure you want to delete this record?');">
+                                                <input type="hidden" name="delete_id" value="<?php echo (int)$row['id']; ?>">
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="bi bi-trash3-fill"></i> Delete
+                                                </button>
+                                            </form>
                             </td>
                         </tr>
                         <?php endforeach; ?>
