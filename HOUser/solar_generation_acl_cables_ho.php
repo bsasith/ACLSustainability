@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare($sql);
 
             $username      = current_username();
-            $company       = "ACL Cables PLC";
+            $company       = "ACL Cables PLC H/O";
             $energy_type   = "Solar";
             $activity_type = "Solar Electricity Generation";
             $location_name = "Head Office";

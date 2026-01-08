@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare($sql);
 
             $username       = current_username();
-            $company        = "ACL Cables PLC";
+            $company        = "ACL Cables PLC H/O";
             $activity_type  = "Electricity Consumption";
             $emission_scope = "Scope 2";
 
