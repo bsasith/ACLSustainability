@@ -183,7 +183,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
             <div class="kpi-left">
                 <i class="bi bi-fuel-pump-diesel-fill kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">a) Monthly Diesel Consumption – Standby Generators</div>
+                    <div class="kpi-text">Monthly Diesel Consumption – Standby Generators</div>
                     <span class="kpi-meta">ACL Cables PLC</span>
                 </div>
             </div>
@@ -203,7 +203,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
             <div class="kpi-left">
                 <i class="bi bi-fuel-pump-fill kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">b) Monthly Diesel Consumption – Standby Generators</div>
+                    <div class="kpi-text">Monthly Diesel Consumption – Standby Generators</div>
                     <span class="kpi-meta">Ceylon Copper Pvt Ltd</span>
                 </div>
             </div>
@@ -234,7 +234,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
             <div class="kpi-left">
                 <i class="bi bi-lightning-charge kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">a) Monthly Electricity Consumption (kWh)</div>
+                    <div class="kpi-text">Monthly Electricity Consumption (kWh)</div>
                     <span class="kpi-meta">ACL Cables PLC</span>
                 </div>
             </div>
@@ -254,7 +254,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
             <div class="kpi-left">
                 <i class="bi bi-plug-fill kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">b) Monthly Electricity Consumption (kWh)</div>
+                    <div class="kpi-text">Monthly Electricity Consumption (kWh)</div>
                     <span class="kpi-meta">ACL Metals & Alloys</span>
                 </div>
             </div>
@@ -274,7 +274,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
             <div class="kpi-left">
                 <i class="bi bi-building-fill-check kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">c) Monthly Electricity Consumption (kWh)</div>
+                    <div class="kpi-text">Monthly Electricity Consumption (kWh)</div>
                     <span class="kpi-meta">Ceylon Copper</span>
                 </div>
             </div>
@@ -305,7 +305,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'euser') {
             <div class="kpi-left">
                 <i class="bi bi-sun kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">a) Solar Electricity Generation (kWh)</div>
+                    <div class="kpi-text">Solar Electricity Generation (kWh)</div>
                     <span class="kpi-meta">ACL Cables PLC</span>
                 </div>
             </div>

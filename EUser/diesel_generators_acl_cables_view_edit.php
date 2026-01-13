@@ -160,7 +160,7 @@ if ($result) {
                                 <?php echo date('Y-m-d', strtotime($row['created_at'])); ?>
                             </td>
                             <td>
-                               <a href="diesel_boilers_acl_cables_edit_form.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm btn-ghost">
+                               <a href="diesel_generators_acl_cables_edit_form.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm btn-ghost">
                     <i class="bi bi-pencil-square"></i> Edit
                 </a>
                 <form method="post" class="d-inline"

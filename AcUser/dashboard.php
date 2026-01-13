@@ -188,7 +188,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
             <div class="kpi-left">
                 <i class="bi bi-fire kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">a) Monthly Diesel Consumption – Steam Boilers</div>
+                    <div class="kpi-text">Monthly Diesel Consumption – Steam Boilers</div>
                     <span class="kpi-meta">ACL Cables PLC</span>
                 </div>
             </div>
@@ -208,7 +208,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
             <div class="kpi-left">
                 <i class="bi bi-truck-flatbed kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">b) Monthly Diesel Consumption – Forklifts</div>
+                    <div class="kpi-text">Monthly Diesel Consumption – Forklifts</div>
                     <span class="kpi-meta">ACL Cables PLC</span>
                 </div>
             </div>
@@ -228,7 +228,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
             <div class="kpi-left">
                 <i class="bi bi-droplet-fill kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">b) Monthly Furnace Oil Consumption</div>
+                    <div class="kpi-text">Monthly Furnace Oil Consumption</div>
                     <span class="kpi-meta">ACL Metals &amp; Alloys</span>
                 </div>
             </div>
@@ -248,7 +248,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
             <div class="kpi-left">
                 <i class="bi bi-truck kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">c) Monthly Diesel Consumption – Transportation &amp; Logistics</div>
+                    <div class="kpi-text">Monthly Diesel Consumption – Transportation &amp; Logistics</div>
                     <span class="kpi-meta">ACL Factory Complex</span>
                 </div>
             </div>
@@ -268,7 +268,7 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
             <div class="kpi-left">
                 <i class="bi bi-car-front-fill kpi-icon"></i>
                 <div>
-                    <div class="kpi-text">d) Monthly Diesel Consumption – Senior Executive Vehicles</div>
+                    <div class="kpi-text">Monthly Diesel Consumption – Senior Executive Vehicles</div>
                     <span class="kpi-meta">ACL Cables Factory Complex</span>
                 </div>
             </div>

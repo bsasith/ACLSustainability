@@ -242,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="d-flex justify-content-end gap-2">
-                <a href="diesel_generators_acl_cables_view_edit.php" class="btn btn-outline-secondary btn-submit">
+                <a href="diesel_generators_ceylon_copper_view_edit.php" class="btn btn-outline-secondary btn-submit">
                     <i class="bi bi-table"></i> Back to Table
                 </a>
                 <button type="submit" class="btn btn-success btn-submit">
