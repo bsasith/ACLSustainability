@@ -26,11 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
     exit;
 }
 // Fetch data (latest first)
-$sql = "SELECT id,report_year, report_month, fuel_litres, created_by, created_at
+$sql = "SELECT id, report_year, report_month, fuel_litres, created_by, created_at
         FROM ho_distribution_fuel_acl_cables
-        ORDER BY report_year DESC, 
-                 FIELD(report_month,'December','November','October','September','August','July','June','May','April','March','February','January'),
-                 created_at DESC LIMIT 15";
+        ORDER BY id DESC
+        LIMIT 15";
+
 
 $result = $conn->query($sql);
 if ($result) {

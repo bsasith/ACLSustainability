@@ -34,10 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
 
 $sql = "SELECT id, report_year, report_month, solar_kwh, created_by, created_at
         FROM ho_solar_generation_acl_cables
-        ORDER BY report_year DESC,
-                 FIELD(report_month,'December','November','October','September','August','July','June','May','April','March','February','January'),
-                 created_at DESC
+        ORDER BY id DESC
         LIMIT 15";
+
 
 $result = $conn->query($sql);
 if ($result) {
