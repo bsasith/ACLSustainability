@@ -317,7 +317,27 @@ if (!isset($_SESSION['utype']) || $_SESSION['utype'] !== 'acuser') {
                 </a> -->
             </div>
         </div>
-
+<br>
+<br>
+        <!-- a) Downlaod CSV -->
+        <div class="kpi-row">
+            <div class="kpi-left">
+                 <i class="bi bi-download text-danger"></i>
+                <div>
+                    <div class="kpi-text">Change Password</div>
+                    <span class="kpi-meta">Change your account password</span>
+                </div>
+            </div>
+            <div class="kpi-actions">
+                
+                <a href="change_password.php" class="btn btn-primary btn-sm btn-ghost">
+                    <i class="bi bi-shield-lock"></i> Change Password
+                </a>
+                <!-- <a href="diesel_boilers_acl_cables_view_edit.php" class="btn btn-warning btn-sm btn-ghost">
+                    <i class="bi bi-pencil-square"></i> Edit / View
+                </a> -->
+            </div>
+        </div>
 </div>  
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>        
 </body>
